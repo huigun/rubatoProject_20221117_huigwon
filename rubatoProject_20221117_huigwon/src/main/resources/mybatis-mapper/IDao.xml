@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="com.huigwon.rubato.dao.IDao">
+
+	<!-- 멤버 SQL -->
+	
+   <insert id="joinMember">
+   	INSERT INTO rubamember(mid, mpw, mname, memail) VALUES(#{param1}, #{param2}, #{param3} ,#{param4})
+   </insert>
+   
+   <select id="checkUserId" resultType="int">
+   	SELECT COUNT(*) FROM rubamember WHERE mid=#{param1}
+   </select>
+   
+   <select id="checkUserIdAndPw" resultType="int">
+   	SELECT COUNT(*) FROM rubamember WHERE mid=#{param1} and mpw=#{param2}
+   </select>
+   
+   <!-- 자유게시판 SQL -->
+   
+   <insert id="rfbwrite">
+   	INSERT INTO rubafreeboard(rfbnum, rfbname, rfbtitle, rfbcontent, rfbuserid, rfbhit, rfbreplycount) 
+   	VALUES(rfb_seq.nextval, #{param1}, #{param2}, #{param3}, #{param4} , 0, 0)
+   </insert>
+   
+   <select id="rfblist" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT SA2.* FROM(
+		SELECT ROWNUM r1, SA1.* FROM(
+		SELECT * FROM rubafreeboard ORDER BY rfbnum DESC)SA1)SA2
+		WHERE r1 >=#{param1} and r1 <![CDATA[<=#{param2}]]>
+   </select>
+   
+   <select id="rfbview" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT * FROM rubafreeboard WHERE rfbnum=#{param1}
+   </select>
+   
+   <delete id="rfbdelete">
+   		DELETE FROM rubafreeboard WHERE rfbnum=#{param1}
+   </delete>
+   
+   <update id="rfbhit">
+   		UPDATE rubafreeboard SET rfbhit = rfbhit+1 WHERE rfbnum=#{param1}	
+   </update>
+   
+   <select id="rfboardcount" resultType="int">
+   		SELECT COUNT(*) FROM rubafreeboard
+   </select>
+   
+   <select id="rfbrownum" resultType="com.huigwon.rubato.dto.RFBrownum">
+   		SELECT ROWNUM FROM rubafreeboard ORDER BY rownum DESC
+   </select>
+   
+   <!-- 댓글 SQL -->
+   
+   <insert id="rrwrite">
+   		INSERT INTO rubareply(rrnum, rrorinum, rrid, rrcontent) VALUES(RR_SEQ.nextval, #{param1}, #{param2}, #{param3})
+   </insert>
+   
+   <select id="rrlist" resultType="com.huigwon.rubato.dto.RReplyDto">
+   		SELECT * FROM rubareply WHERE rrorinum=#{param1}
+   </select>
+   
+   <update id="rrcount">
+   		UPDATE rubafreeboard SET rfbreplycount=rfbreplycount+1 WHERE rfbnum=#{param1}
+   </update>
+   
+   <update id="rrcount2">
+   		UPDATE rubafreeboard SET rfbreplycount=rfbreplycount-1 WHERE rfbnum=#{param1}
+   </update>
+   
+   <delete id="rrdelete">
+   		DELETE FROM rubareply WHERE rrnum=#{param1}
+   </delete>
+   
+   <!-- 게시판 검색 SQL -->
+   
+   <select id="rfbSearchTitleList" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT * FROM rubafreeboard WHERE rfbtitle LIKE '%' || #{param1} || '%' ORDER BY rfbnum DESC
+   </select>
+   
+   <select id="rfbSearchcontentList" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT * FROM rubafreeboard WHERE rfbcontent LIKE '%' || #{param1} || '%' ORDER BY rfbnum DESC
+   </select>
+   
+   <select id="rfbSearchwriterList" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT * FROM rubafreeboard WHERE rfbname=#{param1}
+   </select>
+   
+   <!-- 파일 업로드 SQL -->
+   
+   <insert id="fileinfoinsert">
+   		INSERT INTO rubafiles(filenum, boardnum, fileoriname, filename, fileextension, fileurl ) VALUES(file_SEQ.nextval, #{param1}, #{param2}, #{param3}, #{param4}, #{param5})
+   </insert>
+   
+   <select id="boardlatestinfo" resultType="com.huigwon.rubato.dto.RFBoardDto">
+   		SELECT * FROM rubafreeboard WHERE rfbuserid=#{param1} ORDER BY rfbnum DESC
+   </select>
+   
+   <select id="getfileinfo" resultType="com.huigwon.rubato.dto.RubaFilesDto">
+   		SELECT * FROM rubafiles WHERE boardnum=#{param1}
+   </select>
+</mapper>
